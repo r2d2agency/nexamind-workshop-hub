@@ -88,25 +88,6 @@ export const api = {
     return response.json();
   },
 
-  // Payments
-  createCheckout: async (data: {
-    name: string;
-    email: string;
-    phone?: string;
-    eventId: string;
-  }) => {
-    const response = await apiFetch('/payments/create-checkout', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    return response.json();
-  },
-
-  getPaymentStatus: async (sessionId: string) => {
-    const response = await apiFetch(`/payments/status/${sessionId}`);
-    return response.json();
-  },
-
   // Admin endpoints
   admin: {
     getDashboard: async () => {

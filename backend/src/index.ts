@@ -5,18 +5,13 @@ import dotenv from 'dotenv';
 
 import { authRoutes } from './routes/auth';
 import { leadsRoutes } from './routes/leads';
-import { paymentsRoutes } from './routes/payments';
 import { adminRoutes } from './routes/admin';
-import { webhookRoutes } from './routes/webhook';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-// Webhook route needs raw body (before json parser)
-app.use('/api/webhook', webhookRoutes);
 
 // Middleware
 app.use(helmet());
@@ -29,7 +24,6 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadsRoutes);
-app.use('/api/payments', paymentsRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check

@@ -7,9 +7,8 @@ const getApiBaseUrl = (): string => {
     return 'http://localhost:3001/api';
   }
   
-  // In production, use your VPS URL
-  // IMPORTANT: Update this to your actual backend URL
-  return import.meta.env.VITE_API_URL || 'https://api.seudominio.com/api';
+  // Production: your VPS backend URL
+  return 'https://nexamind-bd.teste.gleego.com.br/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

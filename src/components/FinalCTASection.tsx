@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin, Calendar } from "lucide-react";
+import { LeadCaptureModal } from "./LeadCaptureModal";
 
 const CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
 
 export const FinalCTASection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section className="py-20 md:py-28 bg-background relative overflow-hidden">
       {/* Background effects */}
@@ -42,15 +46,13 @@ export const FinalCTASection = () => {
             </div>
           </div>
 
-          <a 
-            href={CTA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button 
+            onClick={() => setIsModalOpen(true)}
             className="btn-cta inline-flex items-center gap-3 text-primary-foreground pulse-glow text-xl px-10 py-5"
           >
             GARANTIR MINHA VAGA AGORA
             <ArrowRight className="w-6 h-6" />
-          </a>
+          </button>
 
           <p className="text-muted-foreground mt-6">
             <span className="text-gradient-gold font-semibold">Lote 1:</span> De R$ 997 por apenas{" "}
@@ -62,6 +64,15 @@ export const FinalCTASection = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* Lead Capture Modal */}
+      <LeadCaptureModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          window.open(CTA_LINK, "_blank");
+        }}
+      />
     </section>
   );
 };

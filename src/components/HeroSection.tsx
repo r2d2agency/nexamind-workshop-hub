@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Clock, ArrowRight } from "lucide-react";
 import { CountdownTimer } from "./CountdownTimer";
+import { LeadCaptureModal } from "./LeadCaptureModal";
 import workshopLogo from "@/assets/workshop-logo.webp";
 
 const CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
 
 export const HeroSection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Background gradient overlay */}
@@ -53,7 +57,6 @@ export const HeroSection = () => {
               className="h-24 md:h-32 lg:h-40 mx-auto object-contain"
             />
           </motion.div>
-
 
           {/* Description */}
           <motion.p
@@ -123,15 +126,13 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
-            <a 
-              href={CTA_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button 
+              onClick={() => setIsModalOpen(true)}
               className="btn-cta inline-flex items-center gap-3 text-primary-foreground pulse-glow"
             >
               GARANTIR MINHA VAGA COM 50% OFF
               <ArrowRight className="w-5 h-5" />
-            </a>
+            </button>
             <p className="text-muted-foreground text-sm mt-4">
               ⚡ Vagas extremamente limitadas
             </p>
@@ -141,6 +142,16 @@ export const HeroSection = () => {
 
       {/* Bottom gradient fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+
+      {/* Lead Capture Modal */}
+      <LeadCaptureModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          // Redireciona para o link de pagamento após capturar o lead
+          window.open(CTA_LINK, "_blank");
+        }}
+      />
     </section>
   );
 };

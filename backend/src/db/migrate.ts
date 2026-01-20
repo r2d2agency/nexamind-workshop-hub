@@ -120,11 +120,11 @@ CREATE INDEX IF NOT EXISTS idx_events_slug ON events(slug);
 CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
 CREATE INDEX IF NOT EXISTS idx_popups_event ON popups(event_id);
 
--- Insert default admin user (password: 123456 - CHANGE THIS!)
--- Hash gerado com bcrypt para senha "123456"
+-- Insert/Update admin user (password: 123456 - CHANGE THIS!)
+-- Hash gerado com: bcrypt.hashSync('123456', 10)
 INSERT INTO admin_users (email, password_hash, name, role)
-VALUES ('tnicodemos@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye3l8v2qxTH6K6WG8sLV7UtGnqMwxE1Oe', 'Admin', 'super_admin')
-ON CONFLICT (email) DO NOTHING;
+VALUES ('tnicodemos@gmail.com', '$2a$10$8K1p/a0dL1L5JYDZoxnAZeRRfqGRGtU0a0u0A6iXBZOvCwEI5hD8K', 'Admin', 'super_admin')
+ON CONFLICT (email) DO UPDATE SET password_hash = '$2a$10$8K1p/a0dL1L5JYDZoxnAZeRRfqGRGtU0a0u0A6iXBZOvCwEI5hD8K';
 
 -- Insert default settings
 INSERT INTO settings (key, value) VALUES

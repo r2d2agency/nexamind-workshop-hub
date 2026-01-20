@@ -108,4 +108,35 @@ router.post('/change-password', authenticateToken, async (req: AuthRequest, res)
   }
 });
 
+// Reset password (temporary - remove in production)
+router.post('/reset-admin', async (req, res) => {
+  try {
+    const { email, newPassword, secretKey } = req.body;
+    
+    // Simple protection - use env var in production
+    if (secretKey !== 'nexamind2026reset') {
+      return res.status(403).json({ error: 'Chave inválida' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    const result = await query(
+      'UPDATE admin_users SET password_hash = $1, updated_at = NOW() WHERE email = $2 RETURNING id',
+      [newHash, email]
+    );
+
+    if (result.rows.length === 0) {
+      // Create user if not exists
+      await query(
+        'INSERT INTO admin_users (email, password_hash, name, role) VALUES ($1, $2, $3, $4)',
+        [email, newHash, 'Admin', 'super_admin']
+      );
+    }
+
+    res.json({ message: 'Senha resetada com sucesso' });
+  } catch (error) {
+    console.error('Reset error:', error);
+    res.status(500).json({ error: 'Erro ao resetar senha' });
+  }
+});
+
 export { router as authRoutes };

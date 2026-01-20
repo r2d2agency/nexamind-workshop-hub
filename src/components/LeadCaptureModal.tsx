@@ -11,6 +11,7 @@ interface LeadCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  eventSlug?: string;
 }
 
 const leadSchema = z.object({
@@ -20,7 +21,7 @@ const leadSchema = z.object({
   company: z.string().max(100).optional(),
 });
 
-export const LeadCaptureModal = ({ isOpen, onClose, onSuccess }: LeadCaptureModalProps) => {
+export const LeadCaptureModal = ({ isOpen, onClose, onSuccess, eventSlug }: LeadCaptureModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,11 +40,13 @@ export const LeadCaptureModal = ({ isOpen, onClose, onSuccess }: LeadCaptureModa
     try {
       const validated = leadSchema.parse(formData);
       
-      const response = await api.createLead({
+      const response = await api.leads.create({
         name: validated.name,
         email: validated.email,
         phone: validated.phone || undefined,
         company: validated.company || undefined,
+        eventSlug: eventSlug,
+        source: 'landing_page',
       });
 
       if (response.error) {

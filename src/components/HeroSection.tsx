@@ -4,11 +4,38 @@ import { MapPin, Calendar, Clock, ArrowRight } from "lucide-react";
 import { CountdownTimer } from "./CountdownTimer";
 import { LeadCaptureModal } from "./LeadCaptureModal";
 import workshopLogo from "@/assets/workshop-logo.webp";
+import { EventData } from "@/pages/EventPage";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
+const DEFAULT_CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+  eventData?: EventData;
+}
+
+export const HeroSection = ({ eventData }: HeroSectionProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Dynamic data from event or defaults
+  const location = eventData?.location || "Tangará da Serra - Hotel Ibis";
+  const eventDate = eventData?.date ? parseISO(eventData.date) : new Date("2026-03-12");
+  const formattedDate = format(eventDate, "dd/MM/yyyy", { locale: ptBR });
+  const timeStart = eventData?.time_start || "18h";
+  const timeEnd = eventData?.time_end || "22h";
+  const ctaLink = eventData?.cta_link || DEFAULT_CTA_LINK;
+  const ctaText = eventData?.cta_text || "GARANTIR MINHA VAGA COM 50% OFF";
+  const batchEndDate = eventData?.batch_end_date 
+    ? new Date(eventData.batch_end_date) 
+    : new Date("2026-02-15T23:59:59");
+  const currentBatch = eventData?.current_batch || 1;
+  const priceCents = eventData?.price_cents || 49700;
+  const originalPriceCents = eventData?.original_price_cents || 99700;
+  const price = (priceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+  const originalPrice = (originalPriceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+  const discount = Math.round((1 - priceCents / originalPriceCents) * 100);
+  const installment = (priceCents / 100 / 4).toFixed(2).replace('.', ',');
+  const eventSlug = eventData?.slug;
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
@@ -28,8 +55,8 @@ export const HeroSection = () => {
         className="absolute top-6 right-6 md:top-10 md:right-10 z-20"
       >
         <div className="badge-promo floating-badge">
-          <span className="text-xs md:text-sm">🔥 50% OFF</span>
-          <span className="text-xs md:text-sm font-bold">LOTE 1</span>
+          <span className="text-xs md:text-sm">🔥 {discount}% OFF</span>
+          <span className="text-xs md:text-sm font-bold">LOTE {currentBatch}</span>
         </div>
       </motion.div>
 
@@ -41,7 +68,7 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-primary font-semibold tracking-widest uppercase text-sm mb-4"
           >
-            Workshop Exclusivo · 12/03/2026
+            Workshop Exclusivo · {formattedDate}
           </motion.p>
 
           {/* Workshop Logo */}
@@ -78,15 +105,15 @@ export const HeroSection = () => {
           >
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
-              <span>Tangará da Serra - Hotel Ibis</span>
+              <span>{location}</span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary" />
-              <span>12/03/2026</span>
+              <span>{formattedDate}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
-              <span>18h às 22h</span>
+              <span>{timeStart} às {timeEnd}</span>
             </div>
           </motion.div>
 
@@ -97,8 +124,8 @@ export const HeroSection = () => {
             transition={{ delay: 0.5 }}
             className="mb-10"
           >
-            <p className="text-sm text-muted-foreground mb-4 uppercase tracking-wider">Vagas do Lote 1 encerram em:</p>
-            <CountdownTimer targetDate={new Date("2026-02-15T23:59:59")} />
+            <p className="text-sm text-muted-foreground mb-4 uppercase tracking-wider">Vagas do Lote {currentBatch} encerram em:</p>
+            <CountdownTimer targetDate={batchEndDate} />
           </motion.div>
 
           {/* Price highlight */}
@@ -110,12 +137,12 @@ export const HeroSection = () => {
           >
             <div className="inline-flex items-center gap-4 bg-card/50 backdrop-blur-sm rounded-2xl px-6 py-4 border border-border">
               <div className="text-muted-foreground">
-                <span className="line-through text-lg">R$ 997</span>
+                <span className="line-through text-lg">R$ {originalPrice}</span>
               </div>
               <div className="h-8 w-px bg-border" />
               <div>
-                <span className="text-3xl md:text-4xl font-bold text-gradient-gold">R$ 497</span>
-                <span className="text-muted-foreground text-sm ml-2">ou 4x 135,28</span>
+                <span className="text-3xl md:text-4xl font-bold text-gradient-gold">R$ {price}</span>
+                <span className="text-muted-foreground text-sm ml-2">ou 4x {installment}</span>
               </div>
             </div>
           </motion.div>
@@ -130,7 +157,7 @@ export const HeroSection = () => {
               onClick={() => setIsModalOpen(true)}
               className="btn-cta inline-flex items-center gap-3 text-primary-foreground pulse-glow"
             >
-              GARANTIR MINHA VAGA COM 50% OFF
+              {ctaText}
               <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-muted-foreground text-sm mt-4">
@@ -147,9 +174,10 @@ export const HeroSection = () => {
       <LeadCaptureModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
+        eventSlug={eventSlug}
         onSuccess={() => {
           // Redireciona para o link de pagamento após capturar o lead
-          window.open(CTA_LINK, "_blank");
+          window.open(ctaLink, "_blank");
         }}
       />
     </section>

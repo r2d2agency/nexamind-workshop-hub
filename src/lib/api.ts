@@ -72,6 +72,40 @@ export const api = {
   },
 
   // Leads
+  leads: {
+    create: async (data: {
+      name: string;
+      email: string;
+      phone?: string;
+      company?: string;
+      eventSlug?: string;
+      source?: string;
+    }) => {
+      const response = await apiFetch('/leads', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    getEvent: async (slug: string) => {
+      const response = await fetch(`${API_BASE_URL}/leads/event/${slug}`);
+      if (!response.ok) {
+        throw new Error('Event not found');
+      }
+      return response.json();
+    },
+
+    getPopup: async (eventSlug: string) => {
+      const response = await fetch(`${API_BASE_URL}/leads/popup/${eventSlug}`);
+      if (!response.ok) {
+        return null;
+      }
+      return response.json();
+    },
+  },
+
+  // Legacy - keep for backward compatibility
   createLead: async (data: {
     name: string;
     email: string;

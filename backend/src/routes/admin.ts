@@ -567,7 +567,8 @@ router.patch('/settings', async (req: AuthRequest, res) => {
     const allowedKeys = [
       'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name',
       'logo_admin', 'logo_login', 'favicon',
-      'notify_new_lead', 'notify_email'
+      'notify_new_lead', 'notify_email',
+      'meta_pixel_id', 'google_analytics_id'
     ];
 
     const updates = req.body as Record<string, string>;
@@ -583,6 +584,142 @@ router.patch('/settings', async (req: AuthRequest, res) => {
     }
 
     res.json({ message: 'Configurações atualizadas com sucesso' });
+  } catch (error) {
+    throw error;
+  }
+});
+
+// ========== USERS ==========
+
+// Get all admin users
+router.get('/users', async (req: AuthRequest, res) => {
+  try {
+    const result = await query(
+      'SELECT id, email, name, role, created_at FROM admin_users ORDER BY created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    throw error;
+  }
+});
+
+// Create admin user
+router.post('/users', async (req: AuthRequest, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const schema = z.object({
+      email: z.string().email(),
+      name: z.string().max(255),
+      password: z.string().min(6),
+      role: z.enum(['admin', 'super_admin']).optional()
+    });
+
+    const data = schema.parse(req.body);
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    const result = await query(
+      `INSERT INTO admin_users (email, password_hash, name, role)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, email, name, role, created_at`,
+      [data.email, passwordHash, data.name, data.role || 'admin']
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    if ((error as any).code === '23505') {
+      return res.status(400).json({ error: 'Email já cadastrado' });
+    }
+    throw error;
+  }
+});
+
+// Update admin user
+router.patch('/users/:id', async (req: AuthRequest, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const { id } = req.params;
+    const schema = z.object({
+      email: z.string().email().optional(),
+      name: z.string().max(255).optional(),
+      password: z.string().min(6).optional(),
+      role: z.enum(['admin', 'super_admin']).optional()
+    });
+
+    const data = schema.parse(req.body);
+
+    const updates: string[] = [];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (data.email) {
+      updates.push(`email = $${paramIndex}`);
+      params.push(data.email);
+      paramIndex++;
+    }
+    if (data.name) {
+      updates.push(`name = $${paramIndex}`);
+      params.push(data.name);
+      paramIndex++;
+    }
+    if (data.password) {
+      const passwordHash = await bcrypt.hash(data.password, 10);
+      updates.push(`password_hash = $${paramIndex}`);
+      params.push(passwordHash);
+      paramIndex++;
+    }
+    if (data.role) {
+      updates.push(`role = $${paramIndex}`);
+      params.push(data.role);
+      paramIndex++;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+    }
+
+    updates.push('updated_at = NOW()');
+    params.push(id);
+
+    const result = await query(
+      `UPDATE admin_users SET ${updates.join(', ')} WHERE id = $${paramIndex} 
+       RETURNING id, email, name, role, created_at`,
+      params
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    throw error;
+  }
+});
+
+// Delete admin user
+router.delete('/users/:id', async (req: AuthRequest, res) => {
+  try {
+    // Prevent deleting yourself
+    if (req.user!.id === req.params.id) {
+      return res.status(400).json({ error: 'Você não pode remover sua própria conta' });
+    }
+
+    const result = await query(
+      'DELETE FROM admin_users WHERE id = $1 RETURNING id',
+      [req.params.id]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    res.json({ message: 'Usuário removido com sucesso' });
   } catch (error) {
     throw error;
   }

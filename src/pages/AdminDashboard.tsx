@@ -12,7 +12,10 @@ import {
   MoreVertical,
   Eye,
   Trash2,
-  MessageSquare
+  MessageSquare,
+  Settings,
+  Megaphone,
+  UserCog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +44,10 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import nexamindLogo from "@/assets/nexamind-logo.webp";
+import { AdminUsers } from "@/components/admin/AdminUsers";
+import { AdminEvents } from "@/components/admin/AdminEvents";
+import { AdminPopups } from "@/components/admin/AdminPopups";
+import { AdminSettings } from "@/components/admin/AdminSettings";
 
 interface DashboardStats {
   leads: {
@@ -87,7 +94,7 @@ const AdminDashboard = () => {
   const { user, logout, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  const [activeTab, setActiveTab] = useState<"dashboard" | "leads" | "payments" | "events">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "leads" | "events" | "popups" | "users" | "settings">("dashboard");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsTotal, setLeadsTotal] = useState(0);
@@ -230,8 +237,10 @@ const AdminDashboard = () => {
           {[
             { id: "dashboard", label: "Dashboard", icon: TrendingUp },
             { id: "leads", label: "Leads", icon: Users },
-            { id: "payments", label: "Pagamentos", icon: CreditCard },
-            { id: "events", label: "Eventos", icon: Calendar },
+            { id: "events", label: "Landing Pages", icon: Calendar },
+            { id: "popups", label: "Popups", icon: Megaphone },
+            { id: "users", label: "Usuários", icon: UserCog },
+            { id: "settings", label: "Configurações", icon: Settings },
           ].map((tab) => (
             <Button
               key={tab.id}
@@ -491,41 +500,17 @@ const AdminDashboard = () => {
           </motion.div>
         )}
 
-        {/* Payments Tab */}
-        {activeTab === "payments" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card-premium text-center py-12"
-          >
-            <CreditCard className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Pagamentos</h3>
-            <p className="text-muted-foreground">
-              Acesse o Dashboard do Stripe para ver todos os pagamentos detalhados.
-            </p>
-            <Button 
-              className="mt-4"
-              onClick={() => window.open("https://dashboard.stripe.com/payments", "_blank")}
-            >
-              Abrir Stripe Dashboard
-            </Button>
-          </motion.div>
-        )}
-
         {/* Events Tab */}
-        {activeTab === "events" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card-premium text-center py-12"
-          >
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Eventos</h3>
-            <p className="text-muted-foreground">
-              Gerencie os eventos diretamente no banco de dados.
-            </p>
-          </motion.div>
-        )}
+        {activeTab === "events" && <AdminEvents />}
+
+        {/* Popups Tab */}
+        {activeTab === "popups" && <AdminPopups />}
+
+        {/* Users Tab */}
+        {activeTab === "users" && <AdminUsers />}
+
+        {/* Settings Tab */}
+        {activeTab === "settings" && <AdminSettings />}
       </div>
     </div>
   );

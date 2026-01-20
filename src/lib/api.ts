@@ -118,17 +118,17 @@ export const api = {
       return response.json();
     },
 
-    getPayments: async (params: { page?: number; status?: string } = {}) => {
-      const queryParams = new URLSearchParams();
-      if (params.page) queryParams.set('page', String(params.page));
-      if (params.status) queryParams.set('status', params.status);
-      
-      const response = await apiFetch(`/admin/payments?${queryParams}`);
+    // Events
+    getEvents: async () => {
+      const response = await apiFetch('/admin/events');
       return response.json();
     },
 
-    getEvents: async () => {
-      const response = await apiFetch('/admin/events');
+    createEvent: async (data: Record<string, any>) => {
+      const response = await apiFetch('/admin/events', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
       return response.json();
     },
 
@@ -137,6 +137,111 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
+      return response.json();
+    },
+
+    cloneEvent: async (id: string, data: { slug: string; location: string; date?: string }) => {
+      const response = await apiFetch(`/admin/events/${id}/clone`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    deleteEvent: async (id: string) => {
+      const response = await apiFetch(`/admin/events/${id}`, {
+        method: 'DELETE',
+      });
+      return response.json();
+    },
+
+    // Popups
+    getPopups: async () => {
+      const response = await apiFetch('/admin/popups');
+      return response.json();
+    },
+
+    createPopup: async (data: Record<string, any>) => {
+      const response = await apiFetch('/admin/popups', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    updatePopup: async (id: string, data: Record<string, any>) => {
+      const response = await apiFetch(`/admin/popups/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    deletePopup: async (id: string) => {
+      const response = await apiFetch(`/admin/popups/${id}`, {
+        method: 'DELETE',
+      });
+      return response.json();
+    },
+
+    // Users
+    getUsers: async () => {
+      const response = await apiFetch('/admin/users');
+      return response.json();
+    },
+
+    createUser: async (data: { email: string; name: string; password: string; role?: string }) => {
+      const response = await apiFetch('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    updateUser: async (id: string, data: Record<string, any>) => {
+      const response = await apiFetch(`/admin/users/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    deleteUser: async (id: string) => {
+      const response = await apiFetch(`/admin/users/${id}`, {
+        method: 'DELETE',
+      });
+      return response.json();
+    },
+
+    // Settings
+    getSettings: async () => {
+      const response = await apiFetch('/admin/settings');
+      return response.json();
+    },
+
+    updateSettings: async (data: Record<string, string>) => {
+      const response = await apiFetch('/admin/settings', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    testSmtp: async (data: Record<string, any>) => {
+      const response = await apiFetch('/admin/settings/test-smtp', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    // Payments (placeholder)
+    getPayments: async (params: { page?: number; status?: string } = {}) => {
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.set('page', String(params.page));
+      if (params.status) queryParams.set('status', params.status);
+      
+      const response = await apiFetch(`/admin/payments?${queryParams}`);
       return response.json();
     },
   },

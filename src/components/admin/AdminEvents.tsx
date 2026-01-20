@@ -44,6 +44,7 @@ interface Event {
   current_batch: number;
   price_cents: number;
   original_price_cents: number;
+  batch_end_date: string;
   max_capacity: number;
   current_capacity: number;
   cta_text: string;
@@ -351,6 +352,7 @@ const EventForm = ({
     currentBatch: event.current_batch,
     priceCents: event.price_cents,
     originalPriceCents: event.original_price_cents,
+    batchEndDate: event.batch_end_date || "",
     maxCapacity: event.max_capacity,
     ctaText: event.cta_text || "GARANTIR MINHA VAGA",
     ctaLink: event.cta_link || "",
@@ -427,8 +429,8 @@ const EventForm = ({
       </div>
 
       <div className="border-t pt-4">
-        <h4 className="font-medium mb-3">Preços</h4>
-        <div className="grid grid-cols-3 gap-4">
+        <h4 className="font-medium mb-3">Preços e Lotes</h4>
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Lote Atual</Label>
             <Input
@@ -436,6 +438,17 @@ const EventForm = ({
               value={formData.currentBatch}
               onChange={(e) => setFormData({ ...formData, currentBatch: parseInt(e.target.value) })}
             />
+          </div>
+          <div>
+            <Label>Fim do Lote (Contagem Regressiva)</Label>
+            <Input
+              type="datetime-local"
+              value={formData.batchEndDate}
+              onChange={(e) => setFormData({ ...formData, batchEndDate: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Data/hora para a contagem regressiva do lote
+            </p>
           </div>
           <div>
             <Label>Preço (R$)</Label>

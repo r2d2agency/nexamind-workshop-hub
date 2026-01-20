@@ -40,6 +40,11 @@ export const HeroSection = ({ eventData }: HeroSectionProps) => {
   const installment = (priceCents / 100 / 4).toFixed(2).replace('.', ',');
   const eventSlug = eventData?.slug;
 
+  // Check if batch is ending soon (less than 2 days)
+  const msUntilBatchEnd = +batchEndDate - +new Date();
+  const daysUntilBatchEnd = msUntilBatchEnd / (1000 * 60 * 60 * 24);
+  const isUrgent = daysUntilBatchEnd <= 2 && daysUntilBatchEnd > 0;
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Background gradient overlay */}
@@ -62,6 +67,20 @@ export const HeroSection = ({ eventData }: HeroSectionProps) => {
           <span className="text-xs md:text-sm font-bold">LOTE {currentBatch}</span>
         </div>
       </motion.div>
+
+      {/* Floating urgent badge - shows when batch ending soon */}
+      {isUrgent && (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.8 }}
+          className="absolute top-24 right-6 md:top-28 md:right-10 z-20"
+        >
+          <div className="badge-urgent floating-badge-alt">
+            <span className="text-xs md:text-sm">⚠️ RESTAM POUCAS VAGAS!</span>
+          </div>
+        </motion.div>
+      )}
 
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
         <div className="max-w-4xl mx-auto text-center">

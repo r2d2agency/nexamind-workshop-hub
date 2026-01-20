@@ -1,12 +1,15 @@
+import nexamindLogo from "@/assets/nexamind-logo.webp";
+
 export const Footer = () => {
   return (
     <footer className="py-8 bg-background border-t border-border">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-gradient-primary">NEXA</span>
-            <span className="text-2xl font-bold text-gradient-gold">MIND</span>
-          </div>
+          <img 
+            src={nexamindLogo} 
+            alt="Nexamind" 
+            className="h-10 object-contain"
+          />
           
           <p className="text-muted-foreground text-sm text-center">
             © 2026 Nexamind - Desenvolvimento Humano e Organizacional. Todos os direitos reservados.

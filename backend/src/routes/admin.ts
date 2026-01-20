@@ -451,24 +451,28 @@ router.post('/popups', async (req: AuthRequest, res) => {
       name: z.string().max(255),
       title: z.string().max(255),
       subtitle: z.string().optional(),
+      imageUrl: z.string().optional(),
       ebookUrl: z.string().optional(),
       triggerType: z.enum(['exit_intent', 'time_delay', 'scroll']).optional(),
+      triggerDelay: z.number().positive().optional(),
       isActive: z.boolean().optional(),
     });
 
     const data = schema.parse(req.body);
 
     const result = await query(
-      `INSERT INTO popups (event_id, name, title, subtitle, ebook_url, trigger_type, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO popups (event_id, name, title, subtitle, image_url, ebook_url, trigger_type, trigger_delay, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         data.eventId || null,
         data.name,
         data.title,
         data.subtitle,
+        data.imageUrl,
         data.ebookUrl,
         data.triggerType || 'exit_intent',
+        data.triggerDelay || 5,
         data.isActive !== false,
       ]
     );
@@ -491,8 +495,10 @@ router.patch('/popups/:id', async (req: AuthRequest, res) => {
       name: z.string().max(255).optional(),
       title: z.string().max(255).optional(),
       subtitle: z.string().optional(),
+      imageUrl: z.string().optional(),
       ebookUrl: z.string().optional(),
       triggerType: z.string().optional(),
+      triggerDelay: z.number().positive().optional(),
       isActive: z.boolean().optional(),
     });
 
@@ -503,8 +509,10 @@ router.patch('/popups/:id', async (req: AuthRequest, res) => {
       name: 'name',
       title: 'title',
       subtitle: 'subtitle',
+      imageUrl: 'image_url',
       ebookUrl: 'ebook_url',
       triggerType: 'trigger_type',
+      triggerDelay: 'trigger_delay',
       isActive: 'is_active'
     };
 

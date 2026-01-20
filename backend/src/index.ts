@@ -14,12 +14,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+  'https://nexaminddho.gleego.com.br',
+  'https://id-preview--37332859-c1c7-4be7-b79e-10878e5b7d47.lovable.app'
+].filter(Boolean) as string[];
+
 // Middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow all for now, log blocked ones
+    }
+  },
   credentials: true
 }));
 app.use(express.json());

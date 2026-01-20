@@ -138,7 +138,9 @@ INSERT INTO settings (key, value) VALUES
   ('logo_login', ''),
   ('favicon', ''),
   ('notify_new_lead', 'true'),
-  ('notify_email', '')
+  ('notify_email', ''),
+  ('meta_pixel_id', ''),
+  ('google_analytics_id', '')
 ON CONFLICT (key) DO NOTHING;
 
 -- Insert default events

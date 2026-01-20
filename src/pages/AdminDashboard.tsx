@@ -7,18 +7,11 @@ import {
   TrendingUp, 
   Calendar,
   LogOut,
-  Search,
-  Filter,
-  MoreVertical,
-  Eye,
-  Trash2,
-  MessageSquare,
   Settings,
   Megaphone,
   UserCog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -28,19 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import nexamindLogo from "@/assets/nexamind-logo.webp";
@@ -48,6 +28,7 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminEvents } from "@/components/admin/AdminEvents";
 import { AdminPopups } from "@/components/admin/AdminPopups";
 import { AdminSettings } from "@/components/admin/AdminSettings";
+import { AdminLeads } from "@/components/admin/AdminLeads";
 
 interface DashboardStats {
   leads: {
@@ -96,11 +77,6 @@ const AdminDashboard = () => {
   
   const [activeTab, setActiveTab] = useState<"dashboard" | "leads" | "events" | "popups" | "users" | "settings">("dashboard");
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [leadsTotal, setLeadsTotal] = useState(0);
-  const [leadsPage, setLeadsPage] = useState(1);
-  const [leadsSearch, setLeadsSearch] = useState("");
-  const [leadsStatus, setLeadsStatus] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -110,55 +86,20 @@ const AdminDashboard = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) {
-      loadData();
+    if (user && activeTab === "dashboard") {
+      loadDashboard();
     }
-  }, [user, activeTab, leadsPage, leadsStatus]);
+  }, [user, activeTab]);
 
-  const loadData = async () => {
+  const loadDashboard = async () => {
     setIsLoading(true);
     try {
-      if (activeTab === "dashboard") {
-        const data = await api.admin.getDashboard();
-        setStats(data);
-      } else if (activeTab === "leads") {
-        const data = await api.admin.getLeads({ 
-          page: leadsPage, 
-          status: leadsStatus || undefined,
-          search: leadsSearch || undefined
-        });
-        setLeads(data.leads);
-        setLeadsTotal(data.total);
-      }
+      const data = await api.admin.getDashboard();
+      setStats(data);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error("Error loading dashboard:", error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSearchLeads = () => {
-    setLeadsPage(1);
-    loadData();
-  };
-
-  const handleUpdateLeadStatus = async (leadId: string, status: string) => {
-    try {
-      await api.admin.updateLead(leadId, { status });
-      loadData();
-    } catch (error) {
-      console.error("Error updating lead:", error);
-    }
-  };
-
-  const handleDeleteLead = async (leadId: string) => {
-    if (!confirm("Tem certeza que deseja remover este lead?")) return;
-    
-    try {
-      await api.admin.deleteLead(leadId);
-      loadData();
-    } catch (error) {
-      console.error("Error deleting lead:", error);
     }
   };
 
@@ -378,127 +319,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Leads Tab */}
-        {activeTab === "leads" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
-          >
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nome ou email..."
-                  value={leadsSearch}
-                  onChange={(e) => setLeadsSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearchLeads()}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={leadsStatus || "all"} onValueChange={(val) => setLeadsStatus(val === "all" ? "" : val)}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="new">Novos</SelectItem>
-                  <SelectItem value="contacted">Contatados</SelectItem>
-                  <SelectItem value="converted">Convertidos</SelectItem>
-                  <SelectItem value="lost">Perdidos</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button onClick={handleSearchLeads}>Buscar</Button>
-            </div>
-
-            {/* Table */}
-            <div className="card-premium">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Telefone</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leads.map((lead) => (
-                    <TableRow key={lead.id}>
-                      <TableCell className="font-medium">{lead.name}</TableCell>
-                      <TableCell>{lead.email}</TableCell>
-                      <TableCell>{lead.phone || "-"}</TableCell>
-                      <TableCell>{getStatusBadge(lead.status)}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(lead.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleUpdateLeadStatus(lead.id, "contacted")}>
-                              <MessageSquare className="w-4 h-4 mr-2" />
-                              Marcar como Contatado
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleUpdateLeadStatus(lead.id, "converted")}>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Marcar como Convertido
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDeleteLead(lead.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Remover
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {leads.length === 0 && !isLoading && (
-                <p className="text-center text-muted-foreground py-8">
-                  Nenhum lead encontrado.
-                </p>
-              )}
-
-              {/* Pagination */}
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground">
-                  Total: {leadsTotal} leads
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={leadsPage === 1}
-                    onClick={() => setLeadsPage(p => p - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={leads.length < 20}
-                    onClick={() => setLeadsPage(p => p + 1)}
-                  >
-                    Próximo
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {activeTab === "leads" && <AdminLeads />}
 
         {/* Events Tab */}
         {activeTab === "events" && <AdminEvents />}

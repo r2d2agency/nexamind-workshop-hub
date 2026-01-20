@@ -52,34 +52,57 @@ router.get('/leads', async (req: AuthRequest, res) => {
     const status = req.query.status as string;
     const search = req.query.search as string;
     const eventId = req.query.eventId as string;
+    const source = req.query.source as string;
+    const dateFrom = req.query.dateFrom as string;
+    const dateTo = req.query.dateTo as string;
     const offset = (page - 1) * limit;
 
     let whereClause = '';
     const params: any[] = [];
     let paramIndex = 1;
 
+    const addCondition = (condition: string) => {
+      whereClause += whereClause ? ' AND ' + condition : ' WHERE ' + condition;
+    };
+
     if (status) {
-      whereClause += ` WHERE status = $${paramIndex}`;
+      addCondition(`l.status = $${paramIndex}`);
       params.push(status);
       paramIndex++;
     }
 
     if (eventId) {
-      const condition = whereClause ? ' AND' : ' WHERE';
-      whereClause += `${condition} event_id = $${paramIndex}`;
+      addCondition(`l.event_id = $${paramIndex}`);
       params.push(eventId);
       paramIndex++;
     }
 
+    if (source) {
+      addCondition(`l.source = $${paramIndex}`);
+      params.push(source);
+      paramIndex++;
+    }
+
+    if (dateFrom) {
+      addCondition(`l.created_at >= $${paramIndex}`);
+      params.push(dateFrom);
+      paramIndex++;
+    }
+
+    if (dateTo) {
+      addCondition(`l.created_at <= $${paramIndex}::date + interval '1 day'`);
+      params.push(dateTo);
+      paramIndex++;
+    }
+
     if (search) {
-      const searchCondition = whereClause ? ' AND' : ' WHERE';
-      whereClause += `${searchCondition} (name ILIKE $${paramIndex} OR email ILIKE $${paramIndex})`;
+      addCondition(`(l.name ILIKE $${paramIndex} OR l.email ILIKE $${paramIndex})`);
       params.push(`%${search}%`);
       paramIndex++;
     }
 
     const countResult = await query(
-      `SELECT COUNT(*) FROM leads${whereClause}`,
+      `SELECT COUNT(*) FROM leads l${whereClause}`,
       params
     );
 
@@ -87,7 +110,7 @@ router.get('/leads', async (req: AuthRequest, res) => {
       `SELECT l.*, e.location as event_location, e.name as event_name
        FROM leads l
        LEFT JOIN events e ON l.event_id = e.id
-       ${whereClause.replace('event_id', 'l.event_id').replace('status', 'l.status').replace('name', 'l.name').replace('email', 'l.email')}
+       ${whereClause}
        ORDER BY l.created_at DESC 
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset]

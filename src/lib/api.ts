@@ -127,11 +127,25 @@ export const api = {
       return response.json();
     },
 
-    getLeads: async (params: { page?: number; status?: string; search?: string } = {}) => {
+    getLeads: async (params: { 
+      page?: number; 
+      limit?: number;
+      status?: string; 
+      search?: string;
+      eventId?: string;
+      source?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    } = {}) => {
       const queryParams = new URLSearchParams();
       if (params.page) queryParams.set('page', String(params.page));
+      if (params.limit) queryParams.set('limit', String(params.limit));
       if (params.status) queryParams.set('status', params.status);
       if (params.search) queryParams.set('search', params.search);
+      if (params.eventId) queryParams.set('eventId', params.eventId);
+      if (params.source) queryParams.set('source', params.source);
+      if (params.dateFrom) queryParams.set('dateFrom', params.dateFrom);
+      if (params.dateTo) queryParams.set('dateTo', params.dateTo);
       
       const response = await apiFetch(`/admin/leads?${queryParams}`);
       return response.json();

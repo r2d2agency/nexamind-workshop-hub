@@ -269,6 +269,19 @@ export const api = {
       return response.json();
     },
 
+    uploadFile: async (file: File) => {
+      const token = localStorage.getItem('auth_token');
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${API_BASE_URL}/admin/upload`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: formData,
+      });
+      return response.json();
+    },
+
     // Payments (placeholder)
     getPayments: async (params: { page?: number; status?: string } = {}) => {
       const queryParams = new URLSearchParams();

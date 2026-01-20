@@ -568,7 +568,8 @@ router.patch('/settings', async (req: AuthRequest, res) => {
       'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name',
       'logo_admin', 'logo_login', 'favicon',
       'notify_new_lead', 'notify_email',
-      'meta_pixel_id', 'google_analytics_id'
+      'meta_pixel_id', 'google_analytics_id',
+      'custom_head_scripts', 'custom_body_scripts'
     ];
 
     const updates = req.body as Record<string, string>;

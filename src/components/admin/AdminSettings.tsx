@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Settings, Mail, Image, BarChart3, Save, TestTube } from "lucide-react";
+import { Settings, Mail, Image, BarChart3, Save, TestTube, Upload, Code, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/lib/api";
+import { api, API_BASE_URL } from "@/lib/api";
 import { toast } from "sonner";
 
 export const AdminSettings = () => {
@@ -14,6 +15,11 @@ export const AdminSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  const logoAdminRef = useRef<HTMLInputElement>(null);
+  const logoLoginRef = useRef<HTMLInputElement>(null);
+  const faviconRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadSettings();
@@ -46,7 +52,6 @@ export const AdminSettings = () => {
           notify_new_lead: settings.notify_new_lead || 'false',
           notify_email: settings.notify_email || '',
         };
-        // Only include password if it was changed
         if (settings.smtp_pass && settings.smtp_pass !== '********') {
           dataToSave.smtp_pass = settings.smtp_pass;
         }
@@ -60,6 +65,11 @@ export const AdminSettings = () => {
           logo_admin: settings.logo_admin || '',
           logo_login: settings.logo_login || '',
           favicon: settings.favicon || '',
+        };
+      } else if (section === 'scripts') {
+        dataToSave = {
+          custom_head_scripts: settings.custom_head_scripts || '',
+          custom_body_scripts: settings.custom_body_scripts || '',
         };
       }
 
@@ -96,6 +106,26 @@ export const AdminSettings = () => {
     }
   };
 
+  const handleFileUpload = async (field: string, file: File) => {
+    setUploadingField(field);
+    try {
+      const result = await api.admin.uploadFile(file);
+      if (result.url) {
+        // Build full URL for the uploaded file
+        const baseUrl = API_BASE_URL.replace('/api', '');
+        const fullUrl = `${baseUrl}${result.url}`;
+        updateSetting(field, fullUrl);
+        toast.success("Arquivo enviado!");
+      } else {
+        toast.error(result.error || "Erro ao enviar arquivo");
+      }
+    } catch (error) {
+      toast.error("Erro ao enviar arquivo");
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
   const updateSetting = (key: string, value: string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
@@ -120,18 +150,22 @@ export const AdminSettings = () => {
       </h2>
 
       <Tabs defaultValue="smtp" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="smtp" className="flex items-center gap-2">
             <Mail className="w-4 h-4" />
-            E-mail (SMTP)
+            <span className="hidden sm:inline">E-mail</span>
           </TabsTrigger>
           <TabsTrigger value="pixels" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
-            Pixels
+            <span className="hidden sm:inline">Pixels</span>
           </TabsTrigger>
           <TabsTrigger value="logos" className="flex items-center gap-2">
             <Image className="w-4 h-4" />
-            Logos
+            <span className="hidden sm:inline">Logos</span>
+          </TabsTrigger>
+          <TabsTrigger value="scripts" className="flex items-center gap-2">
+            <Code className="w-4 h-4" />
+            <span className="hidden sm:inline">Scripts</span>
           </TabsTrigger>
         </TabsList>
 
@@ -283,41 +317,113 @@ export const AdminSettings = () => {
         <TabsContent value="logos" className="card-premium mt-4 space-y-6">
           <div>
             <h3 className="font-medium mb-4">Logos e Imagens</h3>
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Logo Admin */}
               <div>
-                <Label htmlFor="logo_admin">Logo do Painel Admin (URL)</Label>
-                <Input
-                  id="logo_admin"
-                  value={settings.logo_admin || ''}
-                  onChange={(e) => updateSetting('logo_admin', e.target.value)}
-                  placeholder="https://..."
-                />
+                <Label>Logo do Painel Admin</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={settings.logo_admin || ''}
+                    onChange={(e) => updateSetting('logo_admin', e.target.value)}
+                    placeholder="https://... ou faça upload"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={logoAdminRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload('logo_admin', file);
+                    }}
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => logoAdminRef.current?.click()}
+                    disabled={uploadingField === 'logo_admin'}
+                  >
+                    {uploadingField === 'logo_admin' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
                 {settings.logo_admin && (
                   <img src={settings.logo_admin} alt="Logo Admin" className="h-12 mt-2 bg-white p-2 rounded" />
                 )}
               </div>
 
+              {/* Logo Login */}
               <div>
-                <Label htmlFor="logo_login">Logo da Página de Login (URL)</Label>
-                <Input
-                  id="logo_login"
-                  value={settings.logo_login || ''}
-                  onChange={(e) => updateSetting('logo_login', e.target.value)}
-                  placeholder="https://..."
-                />
+                <Label>Logo da Página de Login</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={settings.logo_login || ''}
+                    onChange={(e) => updateSetting('logo_login', e.target.value)}
+                    placeholder="https://... ou faça upload"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={logoLoginRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload('logo_login', file);
+                    }}
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => logoLoginRef.current?.click()}
+                    disabled={uploadingField === 'logo_login'}
+                  >
+                    {uploadingField === 'logo_login' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
                 {settings.logo_login && (
                   <img src={settings.logo_login} alt="Logo Login" className="h-12 mt-2 bg-white p-2 rounded" />
                 )}
               </div>
 
+              {/* Favicon */}
               <div>
-                <Label htmlFor="favicon">Favicon (URL)</Label>
-                <Input
-                  id="favicon"
-                  value={settings.favicon || ''}
-                  onChange={(e) => updateSetting('favicon', e.target.value)}
-                  placeholder="https://..."
-                />
+                <Label>Favicon</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={settings.favicon || ''}
+                    onChange={(e) => updateSetting('favicon', e.target.value)}
+                    placeholder="https://... ou faça upload"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={faviconRef}
+                    type="file"
+                    accept="image/*,.ico"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload('favicon', file);
+                    }}
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => faviconRef.current?.click()}
+                    disabled={uploadingField === 'favicon'}
+                  >
+                    {uploadingField === 'favicon' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
                 {settings.favicon && (
                   <img src={settings.favicon} alt="Favicon" className="h-8 mt-2" />
                 )}
@@ -327,6 +433,67 @@ export const AdminSettings = () => {
 
           <div className="flex gap-2 justify-end pt-4 border-t">
             <Button onClick={() => handleSave('logos')} disabled={isSaving}>
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Custom Scripts Settings */}
+        <TabsContent value="scripts" className="card-premium mt-4 space-y-6">
+          <div>
+            <h3 className="font-medium mb-4">Scripts Personalizados</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Adicione códigos HTML/JavaScript personalizados. Útil para pixels de conversão, chatbots, ou qualquer script de terceiros.
+            </p>
+            
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="custom_head_scripts">Scripts no &lt;head&gt;</Label>
+                <Textarea
+                  id="custom_head_scripts"
+                  value={settings.custom_head_scripts || ''}
+                  onChange={(e) => updateSetting('custom_head_scripts', e.target.value)}
+                  placeholder="<!-- Cole aqui scripts que devem ficar no <head> -->
+<script>
+  // Exemplo: Meta Pixel, Google Tag Manager, etc.
+</script>"
+                  className="font-mono text-sm min-h-[150px]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Carregado no início da página, ideal para: Google Tag Manager, Meta Pixel base code, etc.
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="custom_body_scripts">Scripts no final do &lt;body&gt;</Label>
+                <Textarea
+                  id="custom_body_scripts"
+                  value={settings.custom_body_scripts || ''}
+                  onChange={(e) => updateSetting('custom_body_scripts', e.target.value)}
+                  placeholder="<!-- Cole aqui scripts que devem ficar no final do body -->
+<script>
+  // Exemplo: Chatbots, widgets, etc.
+</script>"
+                  className="font-mono text-sm min-h-[150px]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Carregado após o conteúdo, ideal para: chatbots, widgets de atendimento, etc.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-muted/50 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">💡 Dica: Meta Pixel</h4>
+            <p className="text-sm text-muted-foreground">
+              Para o Meta Pixel, você pode usar o campo "Pixel ID" na aba Pixels (mais simples), 
+              ou colar o código completo aqui se precisar de configurações avançadas.
+            </p>
+          </div>
+
+          <div className="flex gap-2 justify-end pt-4 border-t">
+            <Button onClick={() => handleSave('scripts')} disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? "Salvando..." : "Salvar"}
             </Button>

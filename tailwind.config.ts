@@ -57,6 +57,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        gold: {
+          DEFAULT: "hsl(40 80% 55%)",
+          dark: "hsl(35 90% 45%)",
+        },
+        teal: {
+          light: "hsl(174 60% 55%)",
+          DEFAULT: "hsl(174 60% 45%)",
+          dark: "hsl(174 70% 35%)",
+        },
+      },
+      fontFamily: {
+        display: ['Montserrat', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

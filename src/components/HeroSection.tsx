@@ -19,7 +19,10 @@ export const HeroSection = ({ eventData }: HeroSectionProps) => {
 
   // Dynamic data from event or defaults
   const location = eventData?.location || "Tangará da Serra - Hotel Ibis";
-  const eventDate = eventData?.date ? parseISO(eventData.date) : new Date("2026-03-12");
+  // IMPORTANT: date can arrive as ISO (e.g. 2026-03-13T00:00:00.000Z). For display we want the calendar date,
+  // so we strip time to avoid timezone shifting (showing the previous day in Brasília).
+  const eventDateOnly = eventData?.date ? eventData.date.split("T")[0] : undefined;
+  const eventDate = eventDateOnly ? parseISO(eventDateOnly) : new Date("2026-03-12");
   const formattedDate = format(eventDate, "dd/MM/yyyy", { locale: ptBR });
   const timeStart = eventData?.time_start || "18h";
   const timeEnd = eventData?.time_end || "22h";

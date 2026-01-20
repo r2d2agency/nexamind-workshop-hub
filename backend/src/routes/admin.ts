@@ -203,7 +203,30 @@ router.delete('/leads/:id', async (req: AuthRequest, res) => {
 router.get('/events', async (req: AuthRequest, res) => {
   try {
     const result = await query(
-      'SELECT * FROM events ORDER BY date ASC'
+      `SELECT 
+         id,
+         slug,
+         name,
+         location,
+         address,
+         date::text as date,
+         time_start,
+         time_end,
+         current_batch,
+         price_cents,
+         original_price_cents,
+         batch_end_date,
+         max_capacity,
+         current_capacity,
+         cta_text,
+         cta_link,
+         hero_title,
+         hero_subtitle,
+         is_active,
+         created_at,
+         updated_at
+       FROM events
+       ORDER BY date ASC`
     );
     res.json(result.rows);
   } catch (error) {
@@ -215,7 +238,30 @@ router.get('/events', async (req: AuthRequest, res) => {
 router.get('/events/:id', async (req: AuthRequest, res) => {
   try {
     const result = await query(
-      'SELECT * FROM events WHERE id = $1',
+      `SELECT 
+         id,
+         slug,
+         name,
+         location,
+         address,
+         date::text as date,
+         time_start,
+         time_end,
+         current_batch,
+         price_cents,
+         original_price_cents,
+         batch_end_date,
+         max_capacity,
+         current_capacity,
+         cta_text,
+         cta_link,
+         hero_title,
+         hero_subtitle,
+         is_active,
+         created_at,
+         updated_at
+       FROM events
+       WHERE id = $1`,
       [req.params.id]
     );
     if (!result.rows[0]) {

@@ -16,7 +16,9 @@ export const FinalCTASection = ({ eventData }: FinalCTASectionProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const location = eventData?.location || "Tangará da Serra";
-  const eventDate = eventData?.date ? parseISO(eventData.date) : new Date("2026-03-12");
+  // Strip time from ISO dates to avoid timezone shifting (showing previous day in Brasília)
+  const eventDateOnly = eventData?.date ? eventData.date.split("T")[0] : undefined;
+  const eventDate = eventDateOnly ? parseISO(eventDateOnly) : new Date("2026-03-12");
   const formattedDate = format(eventDate, "dd/MM/yyyy", { locale: ptBR });
   const timeStart = eventData?.time_start || "18h";
   const timeEnd = eventData?.time_end || "22h";

@@ -68,6 +68,7 @@ const toDatetimeLocalInputValue = (value?: string | null) => {
 };
 
 export const AdminEvents = () => {
+  const adminApi: any = (api as any).admin;
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
@@ -105,7 +106,7 @@ export const AdminEvents = () => {
     if (!selectedEvent) return;
     
     try {
-      await (api.admin as any).cloneEvent(selectedEvent.id, cloneData);
+      await adminApi.cloneEvent(selectedEvent.id, cloneData);
       toast.success("Evento clonado com sucesso!");
       setCloneDialogOpen(false);
       setCloneData({ slug: "", location: "", date: "" });
@@ -119,7 +120,7 @@ export const AdminEvents = () => {
     if (!confirm("Tem certeza que deseja remover este evento?")) return;
     
     try {
-      await (api.admin as any).deleteEvent(id);
+      await adminApi.deleteEvent(id);
       toast.success("Evento removido!");
       loadEvents();
     } catch (error: any) {
@@ -139,7 +140,11 @@ export const AdminEvents = () => {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("pt-BR");
+    const dateOnly = toDateInputValue(dateStr);
+    if (!dateOnly) return "";
+    const [y, m, d] = dateOnly.split("-");
+    if (!y || !m || !d) return dateOnly;
+    return `${d}/${m}/${y}`;
   };
 
   const formatCurrency = (cents: number) => {

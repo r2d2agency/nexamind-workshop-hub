@@ -92,7 +92,7 @@ router.post('/', async (req, res) => {
 router.get('/event/:slug', async (req, res) => {
   try {
     const result = await query(
-      `SELECT id, slug, name, location, address, date, time_start, time_end, 
+      `SELECT id, slug, name, location, address, date::text as date, time_start, time_end, 
               price_cents, original_price_cents, current_batch, batch_end_date,
               max_capacity, current_capacity, cta_text, cta_link, hero_title, hero_subtitle
        FROM events WHERE slug = $1 AND is_active = true`,

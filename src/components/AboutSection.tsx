@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Award, BookOpen, Users, Briefcase } from "lucide-react";
+import soniaAlves from "@/assets/sonia-alves.webp";
 
 export const AboutSection = () => {
   return (
@@ -25,8 +26,12 @@ export const AboutSection = () => {
           >
             <div className="flex flex-col md:flex-row gap-8 items-center">
               {/* Avatar */}
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-primary to-teal-dark flex items-center justify-center text-4xl font-bold text-primary-foreground flex-shrink-0">
-                SA
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-primary/30 flex-shrink-0">
+                <img 
+                  src={soniaAlves} 
+                  alt="Sonia Alves"
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
 
               <div className="flex-1 text-center md:text-left">

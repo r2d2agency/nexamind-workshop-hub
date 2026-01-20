@@ -120,9 +120,10 @@ CREATE INDEX IF NOT EXISTS idx_events_slug ON events(slug);
 CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
 CREATE INDEX IF NOT EXISTS idx_popups_event ON popups(event_id);
 
--- Insert default admin user (password: admin123 - CHANGE THIS!)
+-- Insert default admin user (password: 123456 - CHANGE THIS!)
+-- Hash gerado com bcrypt para senha "123456"
 INSERT INTO admin_users (email, password_hash, name, role)
-VALUES ('admin@nexamind.com.br', '$2a$10$rQnM5.qKvH5JqA5u5GVnXOKvKvKvKvKvKvKvKvKvKvKvKvKvKv', 'Admin', 'super_admin')
+VALUES ('tnicodemos@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye3l8v2qxTH6K6WG8sLV7UtGnqMwxE1Oe', 'Admin', 'super_admin')
 ON CONFLICT (email) DO NOTHING;
 
 -- Insert default settings

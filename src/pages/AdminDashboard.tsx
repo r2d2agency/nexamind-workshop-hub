@@ -387,13 +387,13 @@ const AdminDashboard = () => {
                   className="pl-10"
                 />
               </div>
-              <Select value={leadsStatus} onValueChange={setLeadsStatus}>
+              <Select value={leadsStatus || "all"} onValueChange={(val) => setLeadsStatus(val === "all" ? "" : val)}>
                 <SelectTrigger className="w-full sm:w-40">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="new">Novos</SelectItem>
                   <SelectItem value="contacted">Contatados</SelectItem>
                   <SelectItem value="converted">Convertidos</SelectItem>

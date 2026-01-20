@@ -6,7 +6,6 @@ Backend Node.js/Express para o sistema de Workshop da Nexamind.
 
 - Node.js 18+
 - PostgreSQL 14+
-- Conta Stripe
 
 ## 🚀 Setup no EasyPanel
 
@@ -29,8 +28,6 @@ Configure as variáveis:
 ```env
 DATABASE_URL=postgresql://user:password@nexamind-db:5432/postgres
 JWT_SECRET=gere_uma_chave_segura_aqui
-STRIPE_SECRET_KEY=sk_live_sua_chave
-STRIPE_WEBHOOK_SECRET=whsec_seu_webhook
 FRONTEND_URL=https://seu-dominio.com
 ```
 
@@ -59,9 +56,7 @@ Isso criará as tabelas e o usuário admin padrão.
 ### Públicos
 
 - `POST /api/leads` - Cadastrar lead
-- `POST /api/payments/create-checkout` - Criar sessão de pagamento
-- `GET /api/payments/status/:sessionId` - Status do pagamento
-- `POST /api/webhook/stripe` - Webhook do Stripe
+- `GET /api/health` - Health check
 
 ### Autenticados (Admin)
 
@@ -71,19 +66,8 @@ Isso criará as tabelas e o usuário admin padrão.
 - `GET /api/admin/leads` - Listar leads
 - `PATCH /api/admin/leads/:id` - Atualizar lead
 - `DELETE /api/admin/leads/:id` - Remover lead
-- `GET /api/admin/payments` - Listar pagamentos
 - `GET /api/admin/events` - Listar eventos
 - `PATCH /api/admin/events/:id` - Atualizar evento
-
-## 🔐 Configurar Stripe Webhook
-
-1. No [Dashboard Stripe](https://dashboard.stripe.com/webhooks), crie um webhook
-2. URL: `https://seu-backend.com/api/webhook/stripe`
-3. Eventos para escutar:
-   - `checkout.session.completed`
-   - `checkout.session.expired`
-   - `charge.refunded`
-4. Copie o "Signing secret" para `STRIPE_WEBHOOK_SECRET`
 
 ## 👤 Login Admin Padrão
 

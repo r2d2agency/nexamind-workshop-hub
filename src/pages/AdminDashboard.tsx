@@ -50,7 +50,7 @@ interface DashboardStats {
     converted: string;
     last_week: string;
   };
-  payments: {
+  payments?: {
     total: string;
     paid: string;
     revenue: number;
@@ -63,7 +63,7 @@ interface DashboardStats {
     status: string;
     created_at: string;
   }>;
-  recentPayments: Array<{
+  recentPayments?: Array<{
     id: string;
     amount: number;
     status: string;
@@ -285,7 +285,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-sm">Pagamentos</p>
-                    <p className="text-2xl font-bold">{stats.payments.paid}</p>
+                    <p className="text-2xl font-bold">{stats.payments?.paid || "0"}</p>
                   </div>
                 </div>
               </div>
@@ -298,7 +298,7 @@ const AdminDashboard = () => {
                   <div>
                     <p className="text-muted-foreground text-sm">Receita</p>
                     <p className="text-2xl font-bold text-gradient-gold">
-                      {formatCurrency(stats.payments.revenue)}
+                      {formatCurrency(stats.payments?.revenue || 0)}
                     </p>
                   </div>
                 </div>
@@ -347,7 +347,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {stats.recentPayments.map((payment) => (
+                    {(stats.recentPayments || []).map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell>
                           <div>

@@ -2,11 +2,32 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin, Calendar } from "lucide-react";
 import { LeadCaptureModal } from "./LeadCaptureModal";
+import { EventData } from "@/pages/EventPage";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
+const DEFAULT_CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
 
-export const FinalCTASection = () => {
+interface FinalCTASectionProps {
+  eventData?: EventData;
+}
+
+export const FinalCTASection = ({ eventData }: FinalCTASectionProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const location = eventData?.location || "Tangará da Serra";
+  const eventDate = eventData?.date ? parseISO(eventData.date) : new Date("2026-03-12");
+  const formattedDate = format(eventDate, "dd/MM/yyyy", { locale: ptBR });
+  const timeStart = eventData?.time_start || "18h";
+  const timeEnd = eventData?.time_end || "22h";
+  const ctaLink = eventData?.cta_link || DEFAULT_CTA_LINK;
+  const priceCents = eventData?.price_cents || 49700;
+  const originalPriceCents = eventData?.original_price_cents || 99700;
+  const price = (priceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+  const originalPrice = (originalPriceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+  const discount = Math.round((1 - priceCents / originalPriceCents) * 100);
+  const currentBatch = eventData?.current_batch || 1;
+  const eventSlug = eventData?.slug;
 
   return (
     <section className="py-20 md:py-28 bg-background relative overflow-hidden">
@@ -38,11 +59,11 @@ export const FinalCTASection = () => {
           <div className="flex flex-wrap justify-center gap-6 mb-10 text-muted-foreground">
             <div className="flex items-center gap-2 bg-card/50 px-4 py-2 rounded-lg border border-border">
               <MapPin className="w-5 h-5 text-primary" />
-              <span>Tangará da Serra</span>
+              <span>{location}</span>
             </div>
             <div className="flex items-center gap-2 bg-card/50 px-4 py-2 rounded-lg border border-border">
               <Calendar className="w-5 h-5 text-primary" />
-              <span>12/03/2026 · 18h às 22h</span>
+              <span>{formattedDate} · {timeStart} às {timeEnd}</span>
             </div>
           </div>
 
@@ -55,12 +76,12 @@ export const FinalCTASection = () => {
           </button>
 
           <p className="text-muted-foreground mt-6">
-            <span className="text-gradient-gold font-semibold">Lote 1:</span> De R$ 997 por apenas{" "}
-            <span className="text-foreground font-bold">R$ 497</span> (50% OFF)
+            <span className="text-gradient-gold font-semibold">Lote {currentBatch}:</span> De R$ {originalPrice} por apenas{" "}
+            <span className="text-foreground font-bold">R$ {price}</span> ({discount}% OFF)
           </p>
 
           <p className="text-primary text-sm mt-4 font-medium">
-            ⚡ Vagas Limitadas — Primeiro Lote Liberado
+            ⚡ Vagas Limitadas — Lote {currentBatch} Liberado
           </p>
         </motion.div>
       </div>
@@ -69,8 +90,9 @@ export const FinalCTASection = () => {
       <LeadCaptureModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
+        eventSlug={eventSlug}
         onSuccess={() => {
-          window.open(CTA_LINK, "_blank");
+          window.open(ctaLink, "_blank");
         }}
       />
     </section>

@@ -1,29 +1,33 @@
 import { motion } from "framer-motion";
+import soniaAlves from "@/assets/sonia-alves.webp";
+import veruskaGalvao from "@/assets/veruska-galvao.webp";
+import luizVicente from "@/assets/luiz-vicente.webp";
+import rafaelFreitas from "@/assets/rafael-freitas.webp";
 
 const speakers = [
   {
     name: "Sonia Alves",
     role: "CEO da Nexamind",
     expertise: "RH Estratégico, Cultura Organizacional, Análise Comportamental e NR1",
-    image: "SA"
+    image: soniaAlves
   },
   {
     name: "Veruska Galvão",
     role: "CEO",
     expertise: "Segurança Psicológica e Modelagem da Cultura Organizacional no Brasil",
-    image: "VG"
+    image: veruskaGalvao
   },
   {
     name: "Luiz Vicente",
     role: "CEO",
     expertise: "Uma das maiores referências em Análise Comportamental DISC do Brasil",
-    image: "LV"
+    image: luizVicente
   },
   {
     name: "Rafael Freitas",
     role: "CEO da Planus Contabilidade",
     expertise: "Sócio da Simplifique Inteligência Financeira",
-    image: "RF"
+    image: rafaelFreitas
   }
 ];
 
@@ -56,9 +60,13 @@ export const SpeakersSection = () => {
               transition={{ delay: index * 0.15 }}
               className="card-premium text-center group"
             >
-              {/* Avatar placeholder */}
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary to-teal-dark flex items-center justify-center text-2xl font-bold text-primary-foreground">
-                {speaker.image}
+              {/* Avatar */}
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden border-2 border-primary/30">
+                <img 
+                  src={speaker.image} 
+                  alt={speaker.name}
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
               
               <h3 className="text-xl font-bold mb-1 text-foreground">

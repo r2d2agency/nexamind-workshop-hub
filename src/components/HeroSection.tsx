@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Clock, ArrowRight } from "lucide-react";
 import { CountdownTimer } from "./CountdownTimer";
+import workshopLogo from "@/assets/workshop-logo.webp";
 
 const CTA_LINK = "https://tinyurl.com/workshopnexaminddho";
 
@@ -39,27 +40,20 @@ export const HeroSection = () => {
             Workshop Exclusivo · 12/03/2026
           </motion.p>
 
-          {/* Main title */}
-          <motion.h1
+          {/* Workshop Logo */}
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+            className="mb-6"
           >
-            <span className="text-foreground">Business</span>
-            <br />
-            <span className="text-gradient-primary">MindShift</span>
-          </motion.h1>
+            <img 
+              src={workshopLogo} 
+              alt="Workshop Negócios Lucrativos" 
+              className="h-24 md:h-32 lg:h-40 mx-auto object-contain"
+            />
+          </motion.div>
 
-          {/* Subtitle */}
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-gradient-gold font-semibold mb-6"
-          >
-            Workshop Negócios Lucrativos
-          </motion.h2>
 
           {/* Description */}
           <motion.p

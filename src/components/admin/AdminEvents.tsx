@@ -55,6 +55,18 @@ interface Event {
   created_at: string;
 }
 
+const toDateInputValue = (value?: string | null) => {
+  if (!value) return "";
+  // Accept both 'YYYY-MM-DD' and ISO strings
+  return value.split("T")[0];
+};
+
+const toDatetimeLocalInputValue = (value?: string | null) => {
+  if (!value) return "";
+  // Accept 'YYYY-MM-DDTHH:mm', 'YYYY-MM-DDTHH:mm:ss', and ISO with timezone
+  return value.replace("Z", "").slice(0, 16);
+};
+
 export const AdminEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +105,7 @@ export const AdminEvents = () => {
     if (!selectedEvent) return;
     
     try {
-      await api.admin.cloneEvent(selectedEvent.id, cloneData);
+      await (api.admin as any).cloneEvent(selectedEvent.id, cloneData);
       toast.success("Evento clonado com sucesso!");
       setCloneDialogOpen(false);
       setCloneData({ slug: "", location: "", date: "" });
@@ -107,7 +119,7 @@ export const AdminEvents = () => {
     if (!confirm("Tem certeza que deseja remover este evento?")) return;
     
     try {
-      await api.admin.deleteEvent(id);
+      await (api.admin as any).deleteEvent(id);
       toast.success("Evento removido!");
       loadEvents();
     } catch (error: any) {
@@ -122,7 +134,7 @@ export const AdminEvents = () => {
 
   const openCloneDialog = (event: Event) => {
     setSelectedEvent(event);
-    setCloneData({ slug: "", location: "", date: event.date });
+    setCloneData({ slug: "", location: "", date: toDateInputValue(event.date) });
     setCloneDialogOpen(true);
   };
 
@@ -346,13 +358,13 @@ const EventForm = ({
     name: event.name,
     location: event.location,
     address: event.address || "",
-    date: event.date,
+    date: toDateInputValue(event.date),
     timeStart: event.time_start,
     timeEnd: event.time_end,
     currentBatch: event.current_batch,
     priceCents: event.price_cents,
     originalPriceCents: event.original_price_cents,
-    batchEndDate: event.batch_end_date || "",
+    batchEndDate: toDatetimeLocalInputValue(event.batch_end_date),
     maxCapacity: event.max_capacity,
     ctaText: event.cta_text || "GARANTIR MINHA VAGA",
     ctaLink: event.cta_link || "",

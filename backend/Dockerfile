@@ -20,6 +20,9 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Tools for healthcheck and manual debugging (curl/wget)
+RUN apk add --no-cache curl wget
+
 # Copy package files
 COPY package*.json ./
 

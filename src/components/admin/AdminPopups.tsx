@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Megaphone, Plus, Trash2, Edit } from "lucide-react";
+import { Megaphone, Plus, Trash2, Edit, Upload, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,8 +38,10 @@ interface Popup {
   name: string;
   title: string;
   subtitle: string;
+  image_url: string;
   ebook_url: string;
   trigger_type: string;
+  trigger_delay: number;
   is_active: boolean;
   event_location?: string;
   created_at: string;
@@ -57,13 +59,18 @@ export const AdminPopups = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPopup, setEditingPopup] = useState<Popup | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const ebookInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     eventId: "",
     name: "",
     title: "",
     subtitle: "",
+    imageUrl: "",
     ebookUrl: "",
     triggerType: "exit_intent",
+    triggerDelay: 5,
     isActive: true,
   });
 
@@ -92,7 +99,14 @@ export const AdminPopups = () => {
     
     try {
       const data = {
-        ...formData,
+        name: formData.name,
+        title: formData.title,
+        subtitle: formData.subtitle,
+        imageUrl: formData.imageUrl,
+        ebookUrl: formData.ebookUrl,
+        triggerType: formData.triggerType,
+        triggerDelay: formData.triggerDelay,
+        isActive: formData.isActive,
         eventId: formData.eventId || undefined,
       };
 
@@ -141,8 +155,10 @@ export const AdminPopups = () => {
       name: popup.name,
       title: popup.title,
       subtitle: popup.subtitle || "",
+      imageUrl: popup.image_url || "",
       ebookUrl: popup.ebook_url || "",
       triggerType: popup.trigger_type,
+      triggerDelay: popup.trigger_delay || 5,
       isActive: popup.is_active,
     });
     setDialogOpen(true);
@@ -155,10 +171,29 @@ export const AdminPopups = () => {
       name: "",
       title: "",
       subtitle: "",
+      imageUrl: "",
       ebookUrl: "",
       triggerType: "exit_intent",
+      triggerDelay: 5,
       isActive: true,
     });
+  };
+
+  const handleFileUpload = async (file: File, type: 'image' | 'ebook') => {
+    setUploading(type);
+    try {
+      const result = await api.admin.uploadFile(file);
+      if (type === 'image') {
+        setFormData(prev => ({ ...prev, imageUrl: result.url }));
+      } else {
+        setFormData(prev => ({ ...prev, ebookUrl: result.url }));
+      }
+      toast.success(`${type === 'image' ? 'Imagem' : 'E-book'} enviado!`);
+    } catch (error: any) {
+      toast.error(error.message || `Erro ao enviar ${type}`);
+    } finally {
+      setUploading(null);
+    }
   };
 
   const getTriggerLabel = (type: string) => {
@@ -251,13 +286,79 @@ export const AdminPopups = () => {
               </div>
 
               <div>
-                <Label htmlFor="ebookUrl">URL do E-book</Label>
-                <Input
-                  id="ebookUrl"
-                  value={formData.ebookUrl}
-                  onChange={(e) => setFormData({ ...formData, ebookUrl: e.target.value })}
-                  placeholder="https://..."
-                />
+                <Label>Imagem do Popup</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="URL da imagem ou faça upload"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, 'image');
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={uploading === 'image'}
+                  >
+                    {uploading === 'image' ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Image className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+                {formData.imageUrl && (
+                  <img src={formData.imageUrl} alt="Preview" className="mt-2 h-20 rounded object-cover" />
+                )}
+              </div>
+
+              <div>
+                <Label>Arquivo do E-book</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    value={formData.ebookUrl}
+                    onChange={(e) => setFormData({ ...formData, ebookUrl: e.target.value })}
+                    placeholder="URL do e-book ou faça upload"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={ebookInputRef}
+                    type="file"
+                    accept=".pdf,.epub,.mobi"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, 'ebook');
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => ebookInputRef.current?.click()}
+                    disabled={uploading === 'ebook'}
+                  >
+                    {uploading === 'ebook' ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <FileText className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+                {formData.ebookUrl && (
+                  <p className="mt-1 text-xs text-muted-foreground truncate">{formData.ebookUrl}</p>
+                )}
               </div>
 
               <div>
@@ -276,6 +377,20 @@ export const AdminPopups = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {formData.triggerType === "time_delay" && (
+                <div>
+                  <Label htmlFor="triggerDelay">Tempo (segundos)</Label>
+                  <Input
+                    id="triggerDelay"
+                    type="number"
+                    min="1"
+                    value={formData.triggerDelay}
+                    onChange={(e) => setFormData({ ...formData, triggerDelay: parseInt(e.target.value) || 5 })}
+                    placeholder="5"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <Switch

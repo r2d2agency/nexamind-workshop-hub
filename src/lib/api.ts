@@ -52,11 +52,24 @@ export const apiFetch = async (
     window.location.href = '/admin/login';
   }
 
+  // Throw on non-OK responses so callers can show proper error messages
+  if (!response.ok && response.status !== 401) {
+    let message = `Erro na requisição (${response.status})`;
+    try {
+      const data = await response.clone().json();
+      message = data?.error || data?.message || message;
+    } catch {
+      // ignore JSON parse errors
+    }
+    throw new Error(message);
+  }
+
   return response;
 };
 
 // Typed API calls
-export const api = {
+// NOTE: keep API object loosely typed to avoid TS inference drift as endpoints evolve.
+export const api: any = {
   // Auth
   login: async (email: string, password: string) => {
     const response = await apiFetch('/auth/login', {

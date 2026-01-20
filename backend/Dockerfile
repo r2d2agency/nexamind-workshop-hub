@@ -29,6 +29,9 @@ RUN npm install --omit=dev
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# Create uploads directory
+RUN mkdir -p uploads
+
 # Expose port
 EXPOSE 3001
 
@@ -36,5 +39,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Run migrations and start the application
+CMD ["sh", "-c", "node dist/db/migrate.js && node dist/index.js"]

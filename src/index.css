@@ -112,13 +112,39 @@ All colors MUST be HSL.
     box-shadow: 0 5px 20px hsl(40 80% 55% / 0.4);
   }
 
+  .badge-urgent {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm;
+    background: linear-gradient(135deg, hsl(0 85% 55%) 0%, hsl(0 90% 45%) 100%);
+    color: hsl(0 0% 100%);
+    box-shadow: 0 5px 20px hsl(0 85% 55% / 0.5);
+  }
+
   .floating-badge {
     animation: float 3s ease-in-out infinite;
+  }
+
+  .floating-badge-alt {
+    animation: float-alt 3.5s ease-in-out infinite;
   }
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
+  }
+
+  @keyframes float-alt {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-12px) rotate(2deg); }
+  }
+
+  /* Urgent countdown styles */
+  .countdown-urgent .card-premium {
+    border-color: hsl(0 85% 55%) !important;
+    box-shadow: 0 0 20px hsl(0 85% 55% / 0.3);
+  }
+
+  .countdown-urgent .text-primary {
+    color: hsl(0 85% 55%) !important;
   }
 
   @keyframes pulse-glow {

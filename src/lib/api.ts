@@ -1,5 +1,4 @@
 // API configuration for backend connection
-// Update this URL to point to your VPS backend
 
 const getApiBaseUrl = (): string => {
   // In development, use local backend
@@ -7,8 +6,8 @@ const getApiBaseUrl = (): string => {
     return 'http://localhost:3001/api';
   }
   
-  // Production: your VPS backend URL
-  return 'https://nexamind-bd.teste.gleego.com.br/api';
+  // Production: VPS backend
+  return 'https://teste-nexamind-bd.exf0ty.easypanel.host/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

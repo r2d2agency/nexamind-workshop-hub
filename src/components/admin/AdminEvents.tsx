@@ -44,6 +44,7 @@ interface Event {
   current_batch: number;
   price_cents: number;
   original_price_cents: number;
+  installments: number;
   batch_end_date: string;
   max_capacity: number;
   current_capacity: number;
@@ -369,6 +370,7 @@ const EventForm = ({
     currentBatch: event.current_batch,
     priceCents: event.price_cents,
     originalPriceCents: event.original_price_cents,
+    installments: event.installments || 4,
     batchEndDate: toDatetimeLocalInputValue(event.batch_end_date),
     maxCapacity: event.max_capacity,
     ctaText: event.cta_text || "GARANTIR MINHA VAGA",
@@ -484,6 +486,19 @@ const EventForm = ({
               value={formData.originalPriceCents / 100}
               onChange={(e) => setFormData({ ...formData, originalPriceCents: Math.round(parseFloat(e.target.value) * 100) })}
             />
+          </div>
+          <div>
+            <Label>Parcelas</Label>
+            <Input
+              type="number"
+              min="1"
+              max="12"
+              value={formData.installments}
+              onChange={(e) => setFormData({ ...formData, installments: parseInt(e.target.value) || 1 })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Ex: 4x de R$ {((formData.priceCents / 100) / formData.installments).toFixed(2).replace('.', ',')}
+            </p>
           </div>
         </div>
       </div>

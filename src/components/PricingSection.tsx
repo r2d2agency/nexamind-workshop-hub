@@ -23,10 +23,11 @@ interface PricingSectionProps {
 export const PricingSection = ({ eventData }: PricingSectionProps) => {
   const priceCents = eventData?.price_cents || 49700;
   const originalPriceCents = eventData?.original_price_cents || 99700;
+  const installmentsCount = eventData?.installments || 4;
   const price = (priceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
   const originalPrice = (originalPriceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
   const discount = Math.round((1 - priceCents / originalPriceCents) * 100);
-  const installment = (priceCents / 100 / 4).toFixed(2).replace('.', ',');
+  const installment = (priceCents / 100 / installmentsCount).toFixed(2).replace('.', ',');
   const currentBatch = eventData?.current_batch || 1;
   const ctaLink = eventData?.cta_link || DEFAULT_CTA_LINK;
 
@@ -80,7 +81,7 @@ export const PricingSection = ({ eventData }: PricingSectionProps) => {
                 <span className="text-5xl md:text-6xl font-bold text-gradient-gold">R$ {price}</span>
               </div>
               <p className="text-muted-foreground mt-2">
-                ou 4x de <span className="text-foreground font-semibold">R$ {installment}</span>
+                ou {installmentsCount}x de <span className="text-foreground font-semibold">R$ {installment}</span>
               </p>
             </div>
 

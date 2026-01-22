@@ -22,6 +22,7 @@ export interface EventData {
   time_end: string;
   price_cents: number;
   original_price_cents: number;
+  installments: number;
   current_batch: number;
   batch_end_date: string;
   max_capacity: number;

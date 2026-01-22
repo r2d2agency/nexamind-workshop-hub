@@ -29,13 +29,29 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS - Allow all origins for now to debug
-app.use(cors({
-  origin: true,
+// CORS configuration
+// NOTE: With `credentials: true`, we must NOT use `*` as Access-Control-Allow-Origin.
+// We explicitly handle preflight (OPTIONS) to ensure the browser receives CORS headers.
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, server-to-server, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Temporary: allow anyway while we stabilize; keep a log for diagnosis
+    console.warn('[CORS] Origin not in whitelist, allowing temporarily:', origin);
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
+  optionsSuccessStatus: 204,
+};
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve uploaded files

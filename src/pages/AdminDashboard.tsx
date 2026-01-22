@@ -9,7 +9,8 @@ import {
   LogOut,
   Settings,
   Megaphone,
-  UserCog
+  UserCog,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import { AdminEvents } from "@/components/admin/AdminEvents";
 import { AdminPopups } from "@/components/admin/AdminPopups";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminLeads } from "@/components/admin/AdminLeads";
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 
 interface DashboardStats {
   leads: {
@@ -75,7 +77,7 @@ const AdminDashboard = () => {
   const { user, logout, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  const [activeTab, setActiveTab] = useState<"dashboard" | "leads" | "events" | "popups" | "users" | "settings">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "analytics" | "leads" | "events" | "popups" | "users" | "settings">("dashboard");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -177,6 +179,7 @@ const AdminDashboard = () => {
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {[
             { id: "dashboard", label: "Dashboard", icon: TrendingUp },
+            { id: "analytics", label: "Analytics", icon: BarChart3 },
             { id: "leads", label: "Leads", icon: Users },
             { id: "events", label: "Landing Pages", icon: Calendar },
             { id: "popups", label: "Popups", icon: Megaphone },
@@ -317,6 +320,9 @@ const AdminDashboard = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Analytics Tab */}
+        {activeTab === "analytics" && <AdminAnalytics />}
 
         {/* Leads Tab */}
         {activeTab === "leads" && <AdminLeads />}

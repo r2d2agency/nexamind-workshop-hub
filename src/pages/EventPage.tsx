@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import { HeroSection } from "@/components/HeroSection";
 import { BenefitsSection } from "@/components/BenefitsSection";
 import { SpeakersSection } from "@/components/SpeakersSection";
@@ -35,6 +36,9 @@ export interface EventData {
 
 const EventPage = () => {
   const { slug } = useParams<{ slug: string }>();
+
+  // Track page view
+  usePageTracking(slug);
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ['event', slug],

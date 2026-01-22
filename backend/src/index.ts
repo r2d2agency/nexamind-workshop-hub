@@ -7,6 +7,7 @@ import path from 'path';
 import { authRoutes } from './routes/auth';
 import { leadsRoutes } from './routes/leads';
 import { adminRoutes } from './routes/admin';
+import analyticsRoutes from './routes/analytics';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -50,6 +51,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
